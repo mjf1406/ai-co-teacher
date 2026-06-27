@@ -4,4 +4,5 @@ export type AuthContext = {
   email: string | undefined
   name: string | undefined
   image: string | undefined
+  waitUntilReady: () => Promise<void>
 }

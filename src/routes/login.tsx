@@ -24,8 +24,10 @@ export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>): LoginSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
-  beforeLoad: ({ context, search }) => {
-    if (context.auth.isLoading) return
+  beforeLoad: async ({ context, search }) => {
+    if (context.auth.isLoading) {
+      await context.auth.waitUntilReady()
+    }
 
     if (context.auth.isAuthenticated && isAllowedEmail(context.auth.email)) {
       throw redirect({ to: search.redirect ?? '/' })
