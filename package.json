@@ -13,7 +13,8 @@
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
-    "check": "prettier --check ."
+    "check": "prettier --check .",
+    "seed:voice-samples": "bun scripts/seed-voice-samples.ts"
   },
   "dependencies": {
     "@auth/core": "0.41.1",

@@ -11,6 +11,7 @@ export type DictationSettings = {
   voiceId?: string
   accent?: string
   aiWordRepeatMode?: AiWordRepeatMode
+  speechSpeed?: number
 }
 
 export type AudioSegment = {
@@ -26,4 +27,5 @@ export const DEFAULT_SETTINGS: Omit<DictationSettings, 'words'> = {
   silenceBetweenWordGroupsMs: 5000,
   voiceSource: 'ai',
   aiWordRepeatMode: 'synthesize_once',
+  speechSpeed: 1.0,
 }

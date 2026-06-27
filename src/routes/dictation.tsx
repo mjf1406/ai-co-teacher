@@ -4,6 +4,7 @@ import { Loader2, Play, Save } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { ClipRecorder } from '@/components/dictation/clip-recorder'
+import { AiVoiceSample } from '@/components/dictation/ai-voice-sample'
 import { SavedDictations } from '@/components/dictation/saved-dictations'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -125,6 +126,7 @@ function DictationPage() {
   const [aiWordRepeatMode, setAiWordRepeatMode] = useState<AiWordRepeatMode>(
     DEFAULT_SETTINGS.aiWordRepeatMode ?? 'synthesize_once',
   )
+  const [speechSpeed, setSpeechSpeed] = useState(DEFAULT_SETTINGS.speechSpeed ?? 1.0)
   const [accent, setAccent] = useState<string>('')
   const [voiceId, setVoiceId] = useState<string>('')
   const [wordClips, setWordClips] = useState<Record<string, Blob>>({})
@@ -268,6 +270,7 @@ function DictationPage() {
             const base64 = await synthesizeSpeech({
               voiceId,
               text: announcementLabel(index),
+              speed: speechSpeed,
             })
             completed++
             setProgress(Math.round((completed / Math.max(totalSteps, 1)) * 100))
@@ -293,14 +296,14 @@ function DictationPage() {
             if (aiSynthOnce) {
               const cached = aiWordCache.get(wordIndex)
               if (cached) return cached
-              const base64 = await synthesizeSpeech({ voiceId, text: word })
+              const base64 = await synthesizeSpeech({ voiceId, text: word, speed: speechSpeed })
               completed++
               setProgress(Math.round((completed / Math.max(totalSteps, 1)) * 100))
               const blob = base64ToBlob(base64, 'audio/mpeg')
               aiWordCache.set(wordIndex, blob)
               return blob
             }
-            const base64 = await synthesizeSpeech({ voiceId, text: word })
+            const base64 = await synthesizeSpeech({ voiceId, text: word, speed: speechSpeed })
             completed++
             setProgress(Math.round((completed / Math.max(totalSteps, 1)) * 100))
             return base64ToBlob(base64, 'audio/mpeg')
@@ -348,6 +351,7 @@ function DictationPage() {
         voiceId: voiceSource === 'ai' ? voiceId : undefined,
         accent: voiceSource === 'ai' ? accent : undefined,
         aiWordRepeatMode: voiceSource === 'ai' ? aiWordRepeatMode : undefined,
+        speechSpeed: voiceSource === 'ai' ? speechSpeed : undefined,
       }
       await createDictation({
         name: saveName.trim(),
@@ -534,16 +538,20 @@ function DictationPage() {
                 </div>
               ) : null}
 
-              {selectedAccentVoices.find((voice) => voice.voiceId === voiceId)?.previewUrl ? (
-                <audio
-                  controls
-                  src={
-                    selectedAccentVoices.find((voice) => voice.voiceId === voiceId)?.previewUrl ??
-                    undefined
-                  }
-                  className="w-full"
-                />
+              {voiceId ? (
+                <div className="space-y-2">
+                  <Label>Speech speed: {speechSpeed.toFixed(1)}x</Label>
+                  <Slider
+                    min={0.7}
+                    max={1.2}
+                    step={0.1}
+                    value={[speechSpeed]}
+                    onValueChange={([value]) => setSpeechSpeed(value ?? 1.0)}
+                  />
+                </div>
               ) : null}
+
+              {voiceId ? <AiVoiceSample voiceId={voiceId} speed={speechSpeed} /> : null}
 
               <div className="space-y-2">
                 <Label>Word repetitions (AI)</Label>

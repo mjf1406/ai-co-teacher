@@ -16,6 +16,7 @@ const dictationSettings = v.object({
   aiWordRepeatMode: v.optional(
     v.union(v.literal('synthesize_once'), v.literal('synthesize_each')),
   ),
+  speechSpeed: v.optional(v.number()),
 })
 
 export const list = query({

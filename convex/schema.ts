@@ -15,6 +15,7 @@ const dictationSettings = v.object({
   aiWordRepeatMode: v.optional(
     v.union(v.literal('synthesize_once'), v.literal('synthesize_each')),
   ),
+  speechSpeed: v.optional(v.number()),
 })
 
 const schema = defineSchema({
@@ -37,6 +38,13 @@ const schema = defineSchema({
   })
     .index('by_user_type_label', ['userId', 'type', 'label'])
     .index('by_dictation', ['dictationId']),
+
+  voicePreviewSamples: defineTable({
+    voiceId: v.string(),
+    speed: v.number(),
+    ladderVersion: v.number(),
+    storageId: v.id('_storage'),
+  }).index('by_voice_speed', ['voiceId', 'speed']),
 })
 
 export default schema
