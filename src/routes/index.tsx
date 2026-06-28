@@ -1,15 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Mic } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 
 import { ToolCard } from '@/components/tool-card'
 import { requireAuth } from '@/lib/auth-guard'
 
 const tools = [
   {
-    title: 'Dictation',
-    description: 'Create audio for your students to dictate',
-    to: '/dictation' as const,
-    icon: Mic,
+    title: 'Vocabulary',
+    description: 'Build worksheets and dictation audio from your word lists',
+    to: '/vocabulary' as const,
+    search: { worksheet: 'all' as const },
+    icon: BookOpen,
   },
 ]
 

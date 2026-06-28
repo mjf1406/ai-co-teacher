@@ -1,5 +1,5 @@
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import { LogOut } from 'lucide-react'
 
@@ -13,6 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu'
+import { cn } from '@/lib/utils'
+import {
+  VOCABULARY_NAV_ITEMS,
+  parseWorksheetView,
+  type WorksheetView,
+} from '@/lib/vocabulary-types'
 
 import { api } from '../../convex/_generated/api'
 
@@ -32,6 +46,16 @@ function getDisplayName(email: string) {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
+}
+
+function useActiveWorksheetView(): WorksheetView | null {
+  return useRouterState({
+    select: (state) => {
+      if (state.location.pathname !== '/vocabulary') return null
+      const search = state.location.search as Record<string, unknown>
+      return parseWorksheetView(search.worksheet)
+    },
+  })
 }
 
 function UserMenu() {
@@ -99,6 +123,40 @@ function UserMenu() {
   )
 }
 
+function VocabularyNavMenu() {
+  const activeView = useActiveWorksheetView()
+
+  return (
+    <NavigationMenu viewport={false}>
+      <NavigationMenuList>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>Vocabulary</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="grid w-52 gap-1 p-1">
+              {VOCABULARY_NAV_ITEMS.map((item) => (
+                <li key={item.view}>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/vocabulary"
+                      search={{ worksheet: item.view }}
+                      className={cn(
+                        'block w-full rounded-xl px-3 py-2 text-sm',
+                        activeView === item.view && 'bg-muted font-medium',
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  </NavigationMenuLink>
+                </li>
+              ))}
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+      </NavigationMenuList>
+    </NavigationMenu>
+  )
+}
+
 export function Navbar() {
   return (
     <header className="border-b">
@@ -117,9 +175,7 @@ export function Navbar() {
             />
             AI Co-teacher
           </Link>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/dictation">Dictation</Link>
-          </Button>
+          <VocabularyNavMenu />
         </div>
         <div className="flex items-center gap-1">
           <ThemeToggle />
