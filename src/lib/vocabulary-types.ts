@@ -1,8 +1,9 @@
 export const WORKSHEET_IDS = [
   'dictation-audio',
-  'fill-in-the-blank',
-  'word-search',
+  'draw-one-word',
   'crossword-puzzle',
+  'word-search',
+  'fill-in-the-blank',
   'word-forms',
 ] as const
 
@@ -13,6 +14,7 @@ export type VocabEntry = { word: string; definition?: string }
 
 export const WORKSHEET_LABELS: Record<WorksheetId, string> = {
   'dictation-audio': 'Dictation',
+  'draw-one-word': 'Draw One Word',
   'fill-in-the-blank': 'Fill-in-the-Blank',
   'word-search': 'Word Search',
   'crossword-puzzle': 'Crossword Puzzle',

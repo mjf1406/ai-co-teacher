@@ -3,7 +3,14 @@ import { formatGradeLabel } from '@/lib/differentiation-types'
 import type { FillInBlankSentence } from '@/lib/fill-in-blank-types'
 import { WORKSHEET_IDS, type WorksheetId } from '@/lib/vocabulary-types'
 
-export const PREVIEWABLE_WORKSHEETS = ['dictation-audio', 'fill-in-the-blank'] as const
+export const PREVIEWABLE_WORKSHEETS = [
+  'dictation-audio',
+  'draw-one-word',
+  'fill-in-the-blank',
+  'word-search',
+  'crossword-puzzle',
+  'word-forms',
+] as const
 export type PreviewableWorksheetId = (typeof PREVIEWABLE_WORKSHEETS)[number]
 
 export type WorksheetVariant = {
@@ -67,12 +74,12 @@ export function fillAnswerInSentence(sentence: string, word: string): string {
   return `${cleaned} ${word}`
 }
 
-export function getSentencesForGrade(
-  sentences: FillInBlankSentence[],
+export function getSentencesForGrade<T extends { gradeLevel: GradeLevel }>(
+  sentences: T[],
   gradeLevel: GradeLevel,
   differentiationEnabled: boolean,
   defaultGrade: GradeLevel,
-): FillInBlankSentence[] {
+): T[] {
   const activeGrade = differentiationEnabled ? gradeLevel : defaultGrade
 
   return sentences.filter((sentence) => sentence.gradeLevel === activeGrade)
@@ -109,15 +116,82 @@ export function sanitizeFilename(title: string): string {
     .toLowerCase() || 'worksheet'
 }
 
+export function drawOneWordInstructions(dictationIncluded: boolean): string {
+  if (dictationIncluded) {
+    return 'Choose one word from the Dictation list. Write the word on the line below. Draw a picture that shows what the word means.'
+  }
+  return 'Choose one vocabulary word. Write the word on the line below. Draw a picture that shows what the word means.'
+}
+
 export function fillInBlankInstructions(
   showWordBank: boolean,
   dictationIncluded: boolean,
 ): string {
   if (showWordBank) {
-    return 'Read each sentence and fill in the blank using a word from the word bank below. Each word may be used once.'
+    return 'Read each sentence and fill in the blank using a word from the word bank below. Each word is used exactly once.'
   }
   if (dictationIncluded) {
-    return 'Read each sentence and fill in the blank using the words from the Dictation section as your word bank.'
+    return 'Read each sentence and fill in the blank using the words from the Dictation section as your word bank. Each word is used exactly once.'
   }
-  return 'Read each sentence and fill in the blank using your vocabulary words.'
+  return 'Read each sentence and fill in the blank using your vocabulary words. Each word is used exactly once.'
+}
+
+export function wordSearchInstructions(
+  showWordBank: boolean,
+  dictationIncluded: boolean,
+): string {
+  if (showWordBank) {
+    return 'Find and circle each word in the grid using the word bank below. Words may run horizontally, vertically, or diagonally, and may read forwards or backwards.'
+  }
+  if (dictationIncluded) {
+    return 'Find and circle each word in the grid using the words from the Dictation section as your word bank. Words may run horizontally, vertically, or diagonally, and may read forwards or backwards.'
+  }
+  return 'Find and circle each vocabulary word in the grid. Words may run horizontally, vertically, or diagonally, and may read forwards or backwards.'
+}
+
+export function crosswordInstructions(
+  showWordBank: boolean,
+  dictationIncluded: boolean,
+): string {
+  if (showWordBank) {
+    return 'Read each clue and write the matching vocabulary word in the crossword grid. Use the word bank below if needed. You may also write your answer on the line next to each clue.'
+  }
+  if (dictationIncluded) {
+    return 'Read each clue and write the matching vocabulary word in the crossword grid. Use the words from the Dictation section as your word bank. You may also write your answer on the line next to each clue.'
+  }
+  return 'Read each clue and write the matching vocabulary word in the crossword grid. You may also write your answer on the line next to each clue.'
+}
+
+export function wordFormInstructionSteps(
+  showWordBank: boolean,
+  dictationIncluded: boolean,
+): string[] {
+  if (dictationIncluded) {
+    return [
+      'Look at the Dictation section. The words are in order — the first word you wrote is word 1, the second is word 2, and so on.',
+      'In the Word Forms table, write those same words in the same order in the Base word column (row 1 = word 1, row 2 = word 2, and so on).',
+      'For each word, write the other forms in the row (like -ing, past tense, or noun). If that word does not have that form, write X in that box.',
+      'Read each sentence below. Fill in each blank with the correct word form.',
+    ]
+  }
+  if (showWordBank) {
+    return [
+      'Use the word bank to find each base word. Write the base word in the Base word column of the table.',
+      'For each word, write the other forms in the row (like -ing, past tense, or noun). If that word does not have that form, write X in that box.',
+      'Read each sentence below. Fill in each blank with the correct word form. Use the word bank if you need help.',
+    ]
+  }
+  return [
+    'Write each vocabulary word in the Base word column of the table.',
+    'For each word, write the other forms in the row (like -ing, past tense, or noun). If that word does not have that form, write X in that box.',
+    'Read each sentence below. Fill in each blank with the correct word form.',
+  ]
+}
+
+/** @deprecated Use wordFormInstructionSteps for printable worksheets */
+export function wordFormInstructions(
+  showWordBank: boolean,
+  dictationIncluded: boolean,
+): string {
+  return wordFormInstructionSteps(showWordBank, dictationIncluded).join(' ')
 }

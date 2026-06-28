@@ -1,20 +1,28 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import { CrosswordWorksheet } from '@/components/vocabulary/crossword-worksheet'
 import { DifferentiationCard } from '@/components/vocabulary/differentiation-card'
 import { DictationAudioWorksheet } from '@/components/vocabulary/dictation-audio-worksheet'
+import { DrawOneWordWorksheet } from '@/components/vocabulary/draw-one-word-worksheet'
 import { FillInBlankWorksheet } from '@/components/vocabulary/fill-in-blank-worksheet'
 import { PrintableWorksheet } from '@/components/vocabulary/printable-worksheet'
 import { VocabularyWordInput } from '@/components/vocabulary/vocabulary-word-input'
+import { WordFormsWorksheet } from '@/components/vocabulary/word-forms-worksheet'
+import { WordSearchWorksheet } from '@/components/vocabulary/word-search-worksheet'
 import { WorksheetChecklist } from '@/components/vocabulary/worksheet-checklist'
-import { WorksheetPlaceholder } from '@/components/vocabulary/worksheet-placeholder'
 import { WorksheetPreviewPanel } from '@/components/vocabulary/worksheet-preview-panel'
 import { WorksheetPreviewSheet } from '@/components/vocabulary/worksheet-preview-sheet'
+import type { CrosswordClue } from '@/lib/crossword-types'
 import {
   createDefaultTier,
   type DifferentiationTier,
 } from '@/lib/differentiation-types'
 import type { FillInBlankSentence } from '@/lib/fill-in-blank-types'
+import { DEFAULT_WORD_SEARCH_SETTINGS } from '@/lib/word-search-types'
+import type { WordSearchSettings } from '@/lib/word-search-types'
+import type { WordFormEntry, WordFormSentence } from '@/lib/word-forms-types'
+import { buildEffectiveCrosswordClues } from '@/lib/crossword-types'
 import { requireAuth } from '@/lib/auth-guard'
 import {
   DEFAULT_WORKSHEET_ORDER,
@@ -23,7 +31,6 @@ import {
   type PageSize,
 } from '@/lib/worksheet-preview'
 import {
-  WORKSHEET_LABELS,
   getWords,
   parseVocabularyText,
   parseWorksheetView,
@@ -57,6 +64,17 @@ type BuilderSectionProps = {
     voiceSource: 'ai' | 'own'
   }) => void
   onRestoreDictationOrder: () => void
+  wordSearchSettings: WordSearchSettings
+  onWordSearchSettingsChange: (settings: WordSearchSettings) => void
+  wordSearchWords: string[]
+  wordForms: WordFormEntry[]
+  onWordFormsChange: (wordForms: WordFormEntry[]) => void
+  wordFormSentences: WordFormSentence[]
+  onWordFormSentencesChange: (sentences: WordFormSentence[]) => void
+  crosswordClues: CrosswordClue[]
+  onCrosswordCluesChange: (clues: CrosswordClue[]) => void
+  crosswordWords: string[]
+  crosswordSeed: number
 }
 
 const BUILDER_COMPONENTS: Record<
@@ -78,6 +96,7 @@ const BUILDER_COMPONENTS: Record<
       onRestoreOrder={onRestoreDictationOrder}
     />
   ),
+  'draw-one-word': () => <DrawOneWordWorksheet />,
   'fill-in-the-blank': ({
     entries,
     tiers,
@@ -95,22 +114,49 @@ const BUILDER_COMPONENTS: Record<
       onWordBankChange={onFillInBlankWordBankChange}
     />
   ),
-  'word-search': ({ entries }) => (
-    <WorksheetPlaceholder
-      title={WORKSHEET_LABELS['word-search']}
-      entries={entries}
+  'word-search': ({
+    wordSearchSettings,
+    onWordSearchSettingsChange,
+    wordSearchWords,
+  }) => (
+    <WordSearchWorksheet
+      words={wordSearchWords}
+      settings={wordSearchSettings}
+      onSettingsChange={onWordSearchSettingsChange}
     />
   ),
-  'crossword-puzzle': ({ entries }) => (
-    <WorksheetPlaceholder
-      title={WORKSHEET_LABELS['crossword-puzzle']}
+  'crossword-puzzle': ({
+    entries,
+    tiers,
+    crosswordClues,
+    onCrosswordCluesChange,
+    crosswordWords,
+    crosswordSeed,
+  }) => (
+    <CrosswordWorksheet
       entries={entries}
+      tiers={tiers}
+      crosswordClues={crosswordClues}
+      onCrosswordCluesChange={onCrosswordCluesChange}
+      crosswordWords={crosswordWords}
+      crosswordSeed={crosswordSeed}
     />
   ),
-  'word-forms': ({ entries }) => (
-    <WorksheetPlaceholder
-      title={WORKSHEET_LABELS['word-forms']}
+  'word-forms': ({
+    entries,
+    tiers,
+    wordForms,
+    onWordFormsChange,
+    wordFormSentences,
+    onWordFormSentencesChange,
+  }) => (
+    <WordFormsWorksheet
       entries={entries}
+      tiers={tiers}
+      wordForms={wordForms}
+      onWordFormsChange={onWordFormsChange}
+      wordFormSentences={wordFormSentences}
+      onWordFormSentencesChange={onWordFormSentencesChange}
     />
   ),
 }
@@ -149,6 +195,14 @@ function VocabularyPage() {
   const [dictationAudioVoiceSource, setDictationAudioVoiceSource] = useState<
     'ai' | 'own' | null
   >(null)
+  const [wordSearchSettings, setWordSearchSettings] = useState(
+    DEFAULT_WORD_SEARCH_SETTINGS,
+  )
+  const [wordForms, setWordForms] = useState<WordFormEntry[]>([])
+  const [wordFormSentences, setWordFormSentences] = useState<WordFormSentence[]>(
+    [],
+  )
+  const [crosswordClues, setCrosswordClues] = useState<CrosswordClue[]>([])
 
   useEffect(() => {
     setChecked(worksheetSelectionFromView(worksheet))
@@ -164,6 +218,11 @@ function VocabularyPage() {
     () => getOrderedBuilderWorksheets(worksheetOrder, checked),
     [worksheetOrder, checked],
   )
+  const defaultGrade = tiers[0]?.gradeLevel ?? '5'
+  const effectiveCrosswordClues = useMemo(
+    () => buildEffectiveCrosswordClues(entries, crosswordClues, defaultGrade),
+    [entries, crosswordClues, defaultGrade],
+  )
 
   const dictationAudioStale =
     dictationAudioSeed !== null &&
@@ -172,6 +231,9 @@ function VocabularyPage() {
   useEffect(() => {
     setDictationAudioSeed(null)
     setDictationAudioVoiceSource(null)
+    setWordForms([])
+    setWordFormSentences([])
+    setCrosswordClues([])
   }, [words])
 
   function applyShuffle() {
@@ -212,6 +274,13 @@ function VocabularyPage() {
     sentences: fillInBlankSentences,
     pageSize,
     fillInBlankWordBank,
+    wordSearchSettings,
+    wordSearchSeed: shuffleSeeds['word-search'],
+    wordFormSentences,
+    wordFormShuffleSeed: shuffleSeeds['word-forms'],
+    wordForms,
+    crosswordClues: effectiveCrosswordClues,
+    crosswordSeed: shuffleSeeds['crossword-puzzle'],
   }
 
   const previewProps = {
@@ -237,6 +306,17 @@ function VocabularyPage() {
     dictationAudioStale,
     onDictationAudioGenerated: handleDictationAudioGenerated,
     onRestoreDictationOrder: restoreDictationOrder,
+    wordSearchSettings,
+    onWordSearchSettingsChange: setWordSearchSettings,
+    wordSearchWords: orderedWordsByWorksheet['word-search'],
+    wordForms,
+    onWordFormsChange: setWordForms,
+    wordFormSentences,
+    onWordFormSentencesChange: setWordFormSentences,
+    crosswordClues,
+    onCrosswordCluesChange: setCrosswordClues,
+    crosswordWords: orderedWordsByWorksheet['crossword-puzzle'],
+    crosswordSeed: shuffleSeeds['crossword-puzzle'],
   }
 
   function handleCheckedChange(id: WorksheetId, value: boolean) {
@@ -295,7 +375,7 @@ function VocabularyPage() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed -left-[9999px] top-0"
+        className="pointer-events-none fixed inset-0 -z-50 overflow-hidden opacity-0"
       >
         <PrintableWorksheet {...printableProps} isPrintRoot />
       </div>

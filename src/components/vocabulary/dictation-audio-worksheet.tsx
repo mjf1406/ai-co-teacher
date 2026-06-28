@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { ClipRecorder } from '@/components/dictation/clip-recorder'
 import { AiVoiceSample } from '@/components/dictation/ai-voice-sample'
 import { SavedDictations } from '@/components/dictation/saved-dictations'
+import { CustomizeSectionCollapsible } from '@/components/vocabulary/customize-section-collapsible'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -36,6 +37,7 @@ import {
 import { announcementLabel, buildDictationTimeline } from '@/lib/build-dictation-timeline'
 import { DEFAULT_SETTINGS, type AiWordRepeatMode, type DictationSettings } from '@/lib/dictation-types'
 import { toOrdinalWord } from '@/lib/ordinals'
+import { WORKSHEET_LABELS } from '@/lib/vocabulary-types'
 
 import { api } from '../../../convex/_generated/api'
 
@@ -372,7 +374,9 @@ export function DictationAudioWorksheet({
   return (
     <section className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">Dictation</h2>
+        <h2 className="text-2xl font-semibold">
+          {WORKSHEET_LABELS['dictation-audio']}
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Configure timing and voice, then generate audio from your vocabulary list.
         </p>
@@ -691,29 +695,25 @@ export function DictationAudioWorksheet({
         </Card>
       </div>
 
-      {previewUrl ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="self-start">
-            <CardHeader>
-              <CardTitle>Audio preview</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <audio controls src={previewUrl} className="w-full" />
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" asChild>
-                  <a href={previewUrl} download="dictation.wav">
-                    Download
-                  </a>
-                </Button>
-                <Button onClick={() => setSaveOpen(true)}>
-                  <Save className="size-4" />
-                  Save
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <CustomizeSectionCollapsible
+        sectionName={WORKSHEET_LABELS['dictation-audio']}
+        show={!!previewUrl}
+      >
+        <div className="space-y-4">
+          <audio controls src={previewUrl ?? undefined} className="w-full" />
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <a href={previewUrl ?? undefined} download="dictation.wav">
+                Download
+              </a>
+            </Button>
+            <Button onClick={() => setSaveOpen(true)}>
+              <Save className="size-4" />
+              Save
+            </Button>
+          </div>
         </div>
-      ) : null}
+      </CustomizeSectionCollapsible>
 
       {savedDictations ? <SavedDictations dictations={savedDictations} /> : null}
 

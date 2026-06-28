@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as crossword from "../crossword.js";
 import type * as dictations from "../dictations.js";
 import type * as elevenlabs from "../elevenlabs.js";
 import type * as fillInBlank from "../fillInBlank.js";
@@ -21,6 +22,7 @@ import type * as lib_voiceSampleLadder from "../lib/voiceSampleLadder.js";
 import type * as users from "../users.js";
 import type * as voiceClips from "../voiceClips.js";
 import type * as voicePreviewSamples from "../voicePreviewSamples.js";
+import type * as wordForms from "../wordForms.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +32,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  crossword: typeof crossword;
   dictations: typeof dictations;
   elevenlabs: typeof elevenlabs;
   fillInBlank: typeof fillInBlank;
@@ -42,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   voiceClips: typeof voiceClips;
   voicePreviewSamples: typeof voicePreviewSamples;
+  wordForms: typeof wordForms;
 }>;
 
 /**

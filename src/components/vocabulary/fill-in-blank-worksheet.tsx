@@ -2,6 +2,7 @@ import { useAction } from 'convex/react'
 import { Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
+import { CustomizeSectionCollapsible } from '@/components/vocabulary/customize-section-collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -201,7 +202,7 @@ export function FillInBlankWorksheet({
             aria-label="Include word bank on worksheet"
           />
           <Label htmlFor="fill-in-blank-word-bank" className="font-normal">
-            Include word bank
+            Include word bank (Fill-in-the-Blank & Word Search)
           </Label>
         </div>
       </div>
@@ -284,56 +285,59 @@ export function FillInBlankWorksheet({
             <p className="text-sm text-muted-foreground">
               Generate grade-level sentences from your vocabulary list and differentiation settings.
             </p>
-          ) : (
-            <div className="space-y-6">
-              {tiers.map((tier) => {
-                const tierSentences = aiSentencesByGrade.get(tier.gradeLevel) ?? []
-                if (tierSentences.length === 0) return null
+          ) : null}
 
-                return (
-                  <div key={tier.id} className="space-y-3">
-                    <h3 className="text-sm font-medium">
-                      {gradeHeading(tier.gradeLevel, tierSentences.length)}
-                    </h3>
-                    {tierSentences.map((sentence) => (
-                      <div key={sentence.id} className="flex items-start gap-2">
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <Label
-                            htmlFor={`ai-${sentence.id}`}
-                            className="text-xs text-muted-foreground"
-                          >
-                            {sentence.word}
-                          </Label>
-                          <Input
-                            id={`ai-${sentence.id}`}
-                            value={sentence.sentence}
-                            onChange={(event) =>
-                              updateSentence(sentence.id, event.target.value)
-                            }
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className="mt-6 shrink-0"
-                          aria-label={`Regenerate sentence for ${sentence.word}`}
-                          disabled={regeneratingId === sentence.id}
-                          onClick={() => void handleRegenerate(sentence)}
+          <CustomizeSectionCollapsible
+            sectionName={WORKSHEET_LABELS['fill-in-the-blank']}
+            show={aiSentencesByGrade.size > 0}
+          >
+            {tiers.map((tier) => {
+              const tierSentences = aiSentencesByGrade.get(tier.gradeLevel) ?? []
+              if (tierSentences.length === 0) return null
+
+              return (
+                <div key={tier.id} className="space-y-3">
+                  <h3 className="text-sm font-medium">
+                    {gradeHeading(tier.gradeLevel, tierSentences.length)}
+                  </h3>
+                  {tierSentences.map((sentence) => (
+                    <div key={sentence.id} className="flex items-start gap-2">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <Label
+                          htmlFor={`ai-${sentence.id}`}
+                          className="text-xs text-muted-foreground"
                         >
-                          {regeneratingId === sentence.id ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="size-4" />
-                          )}
-                        </Button>
+                          {sentence.word}
+                        </Label>
+                        <Input
+                          id={`ai-${sentence.id}`}
+                          value={sentence.sentence}
+                          onChange={(event) =>
+                            updateSentence(sentence.id, event.target.value)
+                          }
+                        />
                       </div>
-                    ))}
-                  </div>
-                )
-              })}
-            </div>
-          )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="mt-6 shrink-0"
+                        aria-label={`Regenerate sentence for ${sentence.word}`}
+                        disabled={regeneratingId === sentence.id}
+                        onClick={() => void handleRegenerate(sentence)}
+                      >
+                        {regeneratingId === sentence.id ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="size-4" />
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
+          </CustomizeSectionCollapsible>
         </TabsContent>
       </Tabs>
 

@@ -1,5 +1,5 @@
 import { Download, Shuffle } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
   AlertDialog,
@@ -30,8 +30,11 @@ import {
 } from '@/components/ui/select'
 import { PrintableWorksheet } from '@/components/vocabulary/printable-worksheet'
 import { WorksheetPreviewScaler } from '@/components/vocabulary/worksheet-preview-scaler'
+import type { CrosswordClue } from '@/lib/crossword-types'
 import type { DifferentiationTier } from '@/lib/differentiation-types'
 import type { FillInBlankSentence } from '@/lib/fill-in-blank-types'
+import type { WordFormEntry, WordFormSentence } from '@/lib/word-forms-types'
+import type { WordSearchSettings } from '@/lib/word-search-types'
 import {
   PAGE_SIZE_OPTIONS,
   defaultWorksheetTitle,
@@ -59,6 +62,11 @@ type WorksheetPreviewPanelProps = {
   dictationAudioVoiceSource: 'ai' | 'own' | null
   shuffleSeeds: ShuffleSeeds
   wordCount: number
+  wordSearchSettings: WordSearchSettings
+  wordFormSentences: WordFormSentence[]
+  wordForms: WordFormEntry[]
+  crosswordClues: CrosswordClue[]
+  crosswordSeed: number
   embedded?: boolean
   className?: string
 }
@@ -79,6 +87,11 @@ export function WorksheetPreviewPanel({
   dictationAudioVoiceSource,
   shuffleSeeds,
   wordCount,
+  wordSearchSettings,
+  wordFormSentences,
+  wordForms,
+  crosswordClues,
+  crosswordSeed,
   embedded = false,
   className,
 }: WorksheetPreviewPanelProps) {
@@ -86,6 +99,21 @@ export function WorksheetPreviewPanel({
   const [exportProgress, setExportProgress] = useState(0)
   const [exportError, setExportError] = useState<string | null>(null)
   const [shuffleDialogOpen, setShuffleDialogOpen] = useState(false)
+  const progressFloorRef = useRef(0)
+  const trickleIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  function clearTrickleInterval() {
+    if (trickleIntervalRef.current !== null) {
+      clearInterval(trickleIntervalRef.current)
+      trickleIntervalRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      clearTrickleInterval()
+    }
+  }, [])
 
   const previewableSections = getOrderedPreviewableWorksheets(
     worksheetOrder,
@@ -96,15 +124,32 @@ export function WorksheetPreviewPanel({
 
   async function handleDownloadPdf() {
     setIsExporting(true)
+    progressFloorRef.current = 0
     setExportProgress(0)
     setExportError(null)
+
+    const CEILING = 90
+    clearTrickleInterval()
+    trickleIntervalRef.current = setInterval(() => {
+      setExportProgress((current) => {
+        const eased = current + Math.max(0.5, (CEILING - current) * 0.08)
+        const next = Math.min(CEILING, eased)
+        return Math.max(current, progressFloorRef.current, Math.round(next))
+      })
+    }, 90)
+
     try {
-      await downloadWorksheetPdf(displayTitle, pageSize, setExportProgress)
+      await downloadWorksheetPdf(displayTitle, pageSize, (real) => {
+        progressFloorRef.current = real
+        setExportProgress((current) => Math.max(current, real))
+      })
     } catch (err) {
       setExportError(
         err instanceof Error ? err.message : 'Failed to generate PDF',
       )
     } finally {
+      clearTrickleInterval()
+      setExportProgress(100)
       setIsExporting(false)
       setExportProgress(0)
     }
@@ -187,7 +232,7 @@ export function WorksheetPreviewPanel({
     <div className="overflow-x-hidden overflow-y-auto rounded-lg border bg-muted/30 p-3">
       {previewableSections.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
-          Select Dictation or Fill-in-the-Blank to preview.
+          Select at least one printable worksheet to preview.
         </p>
       ) : wordCount === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
@@ -195,7 +240,7 @@ export function WorksheetPreviewPanel({
         </p>
       ) : (
         <WorksheetPreviewScaler
-          measureKey={`${pageSize}:${JSON.stringify(shuffleSeeds)}:${wordCount}:${sentences.length}:${fillInBlankWordBank}:${worksheetOrder.join(',')}:${JSON.stringify(checked)}:${differentiationEnabled}:${JSON.stringify(tiers)}`}
+          measureKey={`${pageSize}:${JSON.stringify(shuffleSeeds)}:${wordCount}:${sentences.length}:${fillInBlankWordBank}:${worksheetOrder.join(',')}:${JSON.stringify(checked)}:${differentiationEnabled}:${JSON.stringify(tiers)}:${JSON.stringify(wordSearchSettings)}:${wordFormSentences.length}:${JSON.stringify(wordFormSentences)}:${wordForms.length}:${JSON.stringify(wordForms)}:${crosswordClues.length}:${JSON.stringify(crosswordClues)}:${crosswordSeed}`}
         >
           <PrintableWorksheet
             title={title}
@@ -207,6 +252,13 @@ export function WorksheetPreviewPanel({
             sentences={sentences}
             pageSize={pageSize}
             fillInBlankWordBank={fillInBlankWordBank}
+            wordSearchSettings={wordSearchSettings}
+            wordSearchSeed={shuffleSeeds['word-search']}
+            wordFormSentences={wordFormSentences}
+            wordFormShuffleSeed={shuffleSeeds['word-forms']}
+            wordForms={wordForms}
+            crosswordClues={crosswordClues}
+            crosswordSeed={crosswordSeed}
           />
         </WorksheetPreviewScaler>
       )}

@@ -61,7 +61,11 @@ describe('buildOrderedWordsByWorksheet', () => {
     const words = ['a', 'b', 'c', 'd', 'e', 'f']
     const seeds = {
       'dictation-audio': 1,
+      'draw-one-word': 6,
       'fill-in-the-blank': 2,
+      'word-search': 3,
+      'crossword-puzzle': 4,
+      'word-forms': 5,
     } as const
 
     const ordered = buildOrderedWordsByWorksheet(words, seeds)

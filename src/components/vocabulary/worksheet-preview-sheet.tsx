@@ -11,8 +11,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { WorksheetPreviewPanel } from '@/components/vocabulary/worksheet-preview-panel'
+import type { CrosswordClue } from '@/lib/crossword-types'
 import type { DifferentiationTier } from '@/lib/differentiation-types'
 import type { FillInBlankSentence } from '@/lib/fill-in-blank-types'
+import type { WordFormEntry, WordFormSentence } from '@/lib/word-forms-types'
+import type { WordSearchSettings } from '@/lib/word-search-types'
 import type { PageSize, PreviewableWorksheetId } from '@/lib/worksheet-preview'
 import type { WorksheetId } from '@/lib/vocabulary-types'
 import type { ShuffleSeeds } from '@/lib/word-order'
@@ -33,6 +36,11 @@ type WorksheetPreviewSheetProps = {
   dictationAudioVoiceSource: 'ai' | 'own' | null
   shuffleSeeds: ShuffleSeeds
   wordCount: number
+  wordSearchSettings: WordSearchSettings
+  wordFormSentences: WordFormSentence[]
+  wordForms: WordFormEntry[]
+  crosswordClues: CrosswordClue[]
+  crosswordSeed: number
 }
 
 export function WorksheetPreviewSheet({
