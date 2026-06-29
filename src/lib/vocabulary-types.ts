@@ -21,6 +21,26 @@ export const WORKSHEET_LABELS: Record<WorksheetId, string> = {
   'word-forms': 'Word Forms',
 }
 
+export const WORKSHEET_DESCRIPTIONS: Record<WorksheetId, string> = {
+  'dictation-audio': 'Generate dictation audio and a matching worksheet',
+  'draw-one-word': 'Students draw a picture for each vocabulary word',
+  'crossword-puzzle': 'AI-generated crossword clues from your word list',
+  'word-search': 'Customizable word search puzzle',
+  'fill-in-the-blank': 'Sentences with blanks for vocabulary practice',
+  'word-forms': 'Practice different forms of each word',
+}
+
+export function getWorksheetPath(id: WorksheetId): string {
+  return `/vocabulary/${id}`
+}
+
+export function parseWorksheetId(slug: string): WorksheetId | null {
+  if ((WORKSHEET_IDS as readonly string[]).includes(slug)) {
+    return slug as WorksheetId
+  }
+  return null
+}
+
 export const VOCABULARY_NAV_ITEMS: Array<{ label: string; view: WorksheetView }> = [
   { label: 'All', view: 'all' },
   ...WORKSHEET_IDS.map((id) => ({ label: WORKSHEET_LABELS[id], view: id })),

@@ -11,16 +11,14 @@ import {
 type ToolCardProps = {
   title: string
   description: string
-  to: '/vocabulary'
-  search?: { worksheet: 'all' }
+  to: string
   icon: LucideIcon
 }
 
-export function ToolCard({ title, description, to, search, icon: Icon }: ToolCardProps) {
+export function ToolCard({ title, description, to, icon: Icon }: ToolCardProps) {
   return (
     <Link
       to={to}
-      search={search}
       className="block h-full rounded-[min(var(--radius-4xl),24px)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <Card className="h-full items-center justify-center gap-4 p-6 text-center transition-shadow hover:shadow-md">

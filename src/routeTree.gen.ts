@@ -9,16 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VocabularyRouteImport } from './routes/vocabulary'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DictationRouteImport } from './routes/dictation'
+import { Route as VocabularyRouteRouteImport } from './routes/vocabulary/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VocabularyIndexRouteImport } from './routes/vocabulary/index'
+import { Route as VocabularyWorksheetIdRouteImport } from './routes/vocabulary/$worksheetId'
 
-const VocabularyRoute = VocabularyRouteImport.update({
-  id: '/vocabulary',
-  path: '/vocabulary',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -29,55 +26,81 @@ const DictationRoute = DictationRouteImport.update({
   path: '/dictation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VocabularyRouteRoute = VocabularyRouteRouteImport.update({
+  id: '/vocabulary',
+  path: '/vocabulary',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VocabularyIndexRoute = VocabularyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => VocabularyRouteRoute,
+} as any)
+const VocabularyWorksheetIdRoute = VocabularyWorksheetIdRouteImport.update({
+  id: '/$worksheetId',
+  path: '/$worksheetId',
+  getParentRoute: () => VocabularyRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/vocabulary': typeof VocabularyRouteRouteWithChildren
   '/dictation': typeof DictationRoute
   '/login': typeof LoginRoute
-  '/vocabulary': typeof VocabularyRoute
+  '/vocabulary/$worksheetId': typeof VocabularyWorksheetIdRoute
+  '/vocabulary/': typeof VocabularyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dictation': typeof DictationRoute
   '/login': typeof LoginRoute
-  '/vocabulary': typeof VocabularyRoute
+  '/vocabulary/$worksheetId': typeof VocabularyWorksheetIdRoute
+  '/vocabulary': typeof VocabularyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/vocabulary': typeof VocabularyRouteRouteWithChildren
   '/dictation': typeof DictationRoute
   '/login': typeof LoginRoute
-  '/vocabulary': typeof VocabularyRoute
+  '/vocabulary/$worksheetId': typeof VocabularyWorksheetIdRoute
+  '/vocabulary/': typeof VocabularyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dictation' | '/login' | '/vocabulary'
+  fullPaths:
+    | '/'
+    | '/vocabulary'
+    | '/dictation'
+    | '/login'
+    | '/vocabulary/$worksheetId'
+    | '/vocabulary/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dictation' | '/login' | '/vocabulary'
-  id: '__root__' | '/' | '/dictation' | '/login' | '/vocabulary'
+  to: '/' | '/dictation' | '/login' | '/vocabulary/$worksheetId' | '/vocabulary'
+  id:
+    | '__root__'
+    | '/'
+    | '/vocabulary'
+    | '/dictation'
+    | '/login'
+    | '/vocabulary/$worksheetId'
+    | '/vocabulary/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  VocabularyRouteRoute: typeof VocabularyRouteRouteWithChildren
   DictationRoute: typeof DictationRoute
   LoginRoute: typeof LoginRoute
-  VocabularyRoute: typeof VocabularyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/vocabulary': {
-      id: '/vocabulary'
-      path: '/vocabulary'
-      fullPath: '/vocabulary'
-      preLoaderRoute: typeof VocabularyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -92,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DictationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vocabulary': {
+      id: '/vocabulary'
+      path: '/vocabulary'
+      fullPath: '/vocabulary'
+      preLoaderRoute: typeof VocabularyRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -99,14 +129,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vocabulary/': {
+      id: '/vocabulary/'
+      path: '/'
+      fullPath: '/vocabulary/'
+      preLoaderRoute: typeof VocabularyIndexRouteImport
+      parentRoute: typeof VocabularyRouteRoute
+    }
+    '/vocabulary/$worksheetId': {
+      id: '/vocabulary/$worksheetId'
+      path: '/$worksheetId'
+      fullPath: '/vocabulary/$worksheetId'
+      preLoaderRoute: typeof VocabularyWorksheetIdRouteImport
+      parentRoute: typeof VocabularyRouteRoute
+    }
   }
 }
 
+interface VocabularyRouteRouteChildren {
+  VocabularyWorksheetIdRoute: typeof VocabularyWorksheetIdRoute
+  VocabularyIndexRoute: typeof VocabularyIndexRoute
+}
+
+const VocabularyRouteRouteChildren: VocabularyRouteRouteChildren = {
+  VocabularyWorksheetIdRoute: VocabularyWorksheetIdRoute,
+  VocabularyIndexRoute: VocabularyIndexRoute,
+}
+
+const VocabularyRouteRouteWithChildren = VocabularyRouteRoute._addFileChildren(
+  VocabularyRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  VocabularyRouteRoute: VocabularyRouteRouteWithChildren,
   DictationRoute: DictationRoute,
   LoginRoute: LoginRoute,
-  VocabularyRoute: VocabularyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

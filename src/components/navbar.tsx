@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import {
   VOCABULARY_NAV_ITEMS,
-  parseWorksheetView,
+  parseWorksheetId,
   type WorksheetView,
 } from '@/lib/vocabulary-types'
 
@@ -51,9 +51,12 @@ function getDisplayName(email: string) {
 function useActiveWorksheetView(): WorksheetView | null {
   return useRouterState({
     select: (state) => {
-      if (state.location.pathname !== '/vocabulary') return null
-      const search = state.location.search as Record<string, unknown>
-      return parseWorksheetView(search.worksheet)
+      const { pathname } = state.location
+      if (pathname === '/vocabulary') return 'all'
+      const match = pathname.match(/^\/vocabulary\/([^/]+)$/)
+      if (!match) return null
+      const id = parseWorksheetId(match[1]!)
+      return id ?? null
     },
   })
 }
@@ -136,16 +139,28 @@ function VocabularyNavMenu() {
               {VOCABULARY_NAV_ITEMS.map((item) => (
                 <li key={item.view}>
                   <NavigationMenuLink asChild>
-                    <Link
-                      to="/vocabulary"
-                      search={{ worksheet: item.view }}
-                      className={cn(
-                        'block w-full rounded-xl px-3 py-2 text-sm',
-                        activeView === item.view && 'bg-muted font-medium',
-                      )}
-                    >
-                      {item.label}
-                    </Link>
+                    {item.view === 'all' ? (
+                      <Link
+                        to="/vocabulary"
+                        className={cn(
+                          'block w-full rounded-xl px-3 py-2 text-sm',
+                          activeView === item.view && 'bg-muted font-medium',
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/vocabulary/$worksheetId"
+                        params={{ worksheetId: item.view }}
+                        className={cn(
+                          'block w-full rounded-xl px-3 py-2 text-sm',
+                          activeView === item.view && 'bg-muted font-medium',
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    )}
                   </NavigationMenuLink>
                 </li>
               ))}

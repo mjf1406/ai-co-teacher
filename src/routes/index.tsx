@@ -1,18 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { BookOpen } from 'lucide-react'
 
-import { ToolCard } from '@/components/tool-card'
+import { ToolSection } from '@/components/tool-section'
 import { requireAuth } from '@/lib/auth-guard'
-
-const tools = [
-  {
-    title: 'Vocabulary',
-    description: 'Build worksheets and dictation audio from your word lists',
-    to: '/vocabulary' as const,
-    search: { worksheet: 'all' as const },
-    icon: BookOpen,
-  },
-]
+import { TOOL_SECTIONS } from '@/lib/tool-sections'
 
 export const Route = createFileRoute('/')({
   beforeLoad: requireAuth,
@@ -21,7 +11,7 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   return (
-    <div className="mx-auto max-w-5xl px-8 py-8">
+    <div className="mx-auto max-w-5xl space-y-12 px-8 py-8">
       <header className="text-center">
         <h1 className="text-4xl font-bold">AI Co-teacher</h1>
         <p className="mt-4 text-lg text-muted-foreground">
@@ -29,11 +19,9 @@ function Home() {
         </p>
       </header>
 
-      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {tools.map((tool) => (
-          <ToolCard key={tool.to} {...tool} />
-        ))}
-      </div>
+      {TOOL_SECTIONS.map((section) => (
+        <ToolSection key={section.title} {...section} />
+      ))}
     </div>
   )
 }
