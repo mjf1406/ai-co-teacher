@@ -7,17 +7,13 @@ function isAllowedEmail(email: string | undefined): boolean {
   return email?.toLowerCase() === ALLOWED_EMAIL.toLowerCase()
 }
 
-export async function requireAuth({
+export function requireAuth({
   context,
   location,
 }: {
   context: { auth: AuthContext }
-  location: { href: string }
+  location: { pathname: string }
 }) {
-  if (context.auth.isLoading) {
-    await context.auth.waitUntilReady()
-  }
-
   if (!context.auth.isAuthenticated) {
     throw redirect({
       to: '/login',

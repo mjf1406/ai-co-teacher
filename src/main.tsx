@@ -2,7 +2,7 @@ import { ConvexAuthProvider, useConvexAuth } from '@convex-dev/auth/react'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import ReactDOM from 'react-dom/client'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 import { RoutePending } from '@/components/route-pending'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -12,15 +12,20 @@ import { convex } from '@/lib/convex'
 import { api } from '../convex/_generated/api'
 import { routeTree } from './routeTree.gen'
 
+const defaultAuth: AuthContext = {
+  isLoading: true,
+  isAuthenticated: false,
+  email: undefined,
+  name: undefined,
+  image: undefined,
+}
+
 const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   scrollRestoration: true,
-  defaultPendingComponent: RoutePending,
-  defaultPendingMs: 200,
-  defaultPendingMinMs: 300,
   context: {
-    auth: undefined! as AuthContext,
+    auth: defaultAuth,
   },
 })
 
@@ -33,30 +38,8 @@ declare module '@tanstack/react-router' {
 function InnerApp() {
   const { isLoading, isAuthenticated } = useConvexAuth()
   const user = useQuery(api.users.current, isAuthenticated ? {} : 'skip')
-  const authReadyRef = useRef<{
-    promise: Promise<void>
-    resolve: () => void
-  } | null>(null)
 
   const authIsLoading = isLoading || (isAuthenticated && user === undefined)
-
-  function getAuthReadyPromise() {
-    if (!authReadyRef.current) {
-      let resolve!: () => void
-      const promise = new Promise<void>((r) => {
-        resolve = r
-      })
-      authReadyRef.current = { promise, resolve }
-    }
-    return authReadyRef.current.promise
-  }
-
-  useEffect(() => {
-    if (!authIsLoading) {
-      authReadyRef.current?.resolve()
-      authReadyRef.current = null
-    }
-  }, [authIsLoading])
 
   const auth: AuthContext = {
     isLoading: authIsLoading,
@@ -64,13 +47,27 @@ function InnerApp() {
     email: user?.email,
     name: user?.name,
     image: user?.image,
-    waitUntilReady: () =>
-      authIsLoading ? getAuthReadyPromise() : Promise.resolve(),
   }
 
   useEffect(() => {
+    if (authIsLoading) return
+
+    router.update({
+      context: {
+        ...router.options.context,
+        auth,
+      },
+    })
     void router.invalidate()
-  }, [auth.isLoading, auth.isAuthenticated, auth.email])
+  }, [authIsLoading, auth.isAuthenticated, auth.email, auth])
+
+  if (authIsLoading) {
+    return (
+      <ThemeProvider>
+        <RoutePending />
+      </ThemeProvider>
+    )
+  }
 
   return (
     <ThemeProvider>
