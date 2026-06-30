@@ -30,7 +30,7 @@ export type ToolSectionConfig = {
   items: ToolCardConfig[]
 }
 
-const WORKSHEET_ICONS: Record<WorksheetId, LucideIcon> = {
+export const WORKSHEET_ICONS: Record<WorksheetId, LucideIcon> = {
   'dictation-audio': Headphones,
   'draw-one-word': Pencil,
   'crossword-puzzle': Grid3x3,

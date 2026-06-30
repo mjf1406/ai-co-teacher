@@ -284,31 +284,20 @@ export function CrosswordWorksheet({
   }
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold">
-            {WORKSHEET_LABELS['crossword-puzzle']}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add one or two definitions per word. Students use the Dictation section
-            as their word bank to complete the crossword.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch
-            id="crossword-differentiate-definitions"
-            checked={differentiateDefinitions}
-            onCheckedChange={setDifferentiateDefinitions}
-            aria-label="AI generate or differentiate definitions by grade"
-          />
-          <Label
-            htmlFor="crossword-differentiate-definitions"
-            className="font-normal"
+    <>
+      <div className="flex flex-wrap items-center justify-end gap-4">
+        <Switch
+          id="crossword-differentiate-definitions"
+          checked={differentiateDefinitions}
+          onCheckedChange={setDifferentiateDefinitions}
+          aria-label="AI generate or differentiate definitions by grade"
+        />
+        <Label
+          htmlFor="crossword-differentiate-definitions"
+          className="font-normal"
           >
             AI generate / differentiate definitions by grade
           </Label>
-        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -469,6 +458,6 @@ export function CrosswordWorksheet({
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {info ? <p className="text-sm text-muted-foreground">{info}</p> : null}
-    </section>
+    </>
   )
 }

@@ -372,16 +372,7 @@ export function DictationAudioWorksheet({
   ).length
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">
-          {WORKSHEET_LABELS['dictation-audio']}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Configure timing and voice, then generate audio from your vocabulary list.
-        </p>
-      </div>
-
+    <>
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -749,6 +740,6 @@ export function DictationAudioWorksheet({
           </form>
         </DialogContent>
       </Dialog>
-    </section>
+    </>
   )
 }

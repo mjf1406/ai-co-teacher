@@ -186,25 +186,17 @@ export function FillInBlankWorksheet({
   }
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold">{WORKSHEET_LABELS['fill-in-the-blank']}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create sentences with blanks, or let AI generate grade-level versions you can edit.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch
-            id="fill-in-blank-word-bank"
-            checked={wordBank}
-            onCheckedChange={onWordBankChange}
-            aria-label="Include word bank on worksheet"
-          />
-          <Label htmlFor="fill-in-blank-word-bank" className="font-normal">
-            Include word bank (Fill-in-the-Blank & Word Search)
-          </Label>
-        </div>
+    <>
+      <div className="flex flex-wrap items-center justify-end gap-4">
+        <Switch
+          id="fill-in-blank-word-bank"
+          checked={wordBank}
+          onCheckedChange={onWordBankChange}
+          aria-label="Include word bank on worksheet"
+        />
+        <Label htmlFor="fill-in-blank-word-bank" className="font-normal">
+          Include word bank (Fill-in-the-Blank & Word Search)
+        </Label>
       </div>
 
       <Tabs value={mode} onValueChange={(value) => setMode(value as WorksheetMode)}>
@@ -343,6 +335,6 @@ export function FillInBlankWorksheet({
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {info ? <p className="text-sm text-muted-foreground">{info}</p> : null}
-    </section>
+    </>
   )
 }

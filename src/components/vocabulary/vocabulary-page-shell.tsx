@@ -8,6 +8,7 @@ import {
   BUILDER_COMPONENTS,
 } from '@/components/vocabulary/vocabulary-builders'
 import { VocabularyWordInput } from '@/components/vocabulary/vocabulary-word-input'
+import { WorksheetCard } from '@/components/vocabulary/worksheet-card'
 import { WorksheetChecklist } from '@/components/vocabulary/worksheet-checklist'
 import { WorksheetPreviewPanel } from '@/components/vocabulary/worksheet-preview-panel'
 import { WorksheetPreviewSheet } from '@/components/vocabulary/worksheet-preview-sheet'
@@ -126,9 +127,11 @@ export function VocabularyPageShell({ mode }: VocabularyPageShellProps) {
               />
             </div>
 
-            <div className="space-y-10">
+            <div className="space-y-6">
               {orderedBuilders.map((id) => (
-                <div key={id}>{BUILDER_COMPONENTS[id](builderProps)}</div>
+                <WorksheetCard key={id} id={id}>
+                  {BUILDER_COMPONENTS[id](builderProps)}
+                </WorksheetCard>
               ))}
             </div>
           </div>

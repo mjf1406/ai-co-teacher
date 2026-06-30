@@ -21,7 +21,6 @@ import {
   WORD_SEARCH_MIN_SIZE,
   type WordSearchSettings,
 } from '@/lib/word-search-types'
-import { WORKSHEET_LABELS } from '@/lib/vocabulary-types'
 
 type WordSearchWorksheetProps = {
   words: string[]
@@ -68,17 +67,7 @@ export function WordSearchWorksheet({
   }
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">
-          {WORKSHEET_LABELS['word-search']}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Configure grid size, letter case, and which directions words may be
-          placed. Use Shuffle order in the preview to regenerate the puzzle.
-        </p>
-      </div>
-
+    <>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="word-search-width">Width (columns)</Label>
@@ -203,6 +192,6 @@ export function WordSearchWorksheet({
           Enable at least one direction so words can be placed in the grid.
         </p>
       ) : null}
-    </section>
+    </>
   )
 }

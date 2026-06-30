@@ -402,17 +402,7 @@ export function WordFormsWorksheet({
   }
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">
-          {WORKSHEET_LABELS['word-forms']}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Generate word forms and grade-level fill-in-the-blank sentences (one
-          per form). Edit forms and sentences before printing.
-        </p>
-      </div>
-
+    <>
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
@@ -518,6 +508,6 @@ export function WordFormsWorksheet({
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {info ? <p className="text-sm text-muted-foreground">{info}</p> : null}
-    </section>
+    </>
   )
 }
